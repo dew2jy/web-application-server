@@ -15,7 +15,10 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
-* 
+* BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));	// inputStream을 읽기 위한 BufferedReader 생성.
+BufferedReader는 버퍼를 이용해서 입출력의 효율을 높일 수 있도록 해주는 역할을 한다. BufferedReader의 readLine()을 이용하면
+데이터를 라인 단위로 읽을 수 있다.
+* Files.readAllBytes(new File(경로).toPath())를 통해 파일 데이터를 byte 배열로 읽어올 수 있다.
 
 ### 요구사항 2 - get 방식으로 회원가입
 * 

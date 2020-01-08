@@ -35,6 +35,8 @@ public class RequestHandler extends Thread {
         String url = null;
         String requestBody = null;
         int contentLength = 0;
+        int responseCode = 200;
+        String cookie = "";
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()
         		; BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))) {
@@ -59,40 +61,65 @@ public class RequestHandler extends Thread {
         	
         	requestBody = IOUtils.readData(reader, contentLength);
         	
-        	int index = url.indexOf("?");
+        	if("/user/create".equals(url)) {
+        		User user = null;
+        		if(requestBody != null) {
+        			Map<String, String> paramMaps = HttpRequestUtils.parseQueryString(requestBody);
+        			user = new User(paramMaps.get("userId"), paramMaps.get("password"), paramMaps.get("name"), paramMaps.get("email"));
+        		}
+        		DataBase.addUser(user);
+        		
+        		responseCode = 302;
+        		url = "/index.html";
+        	}
         	
-        	if(index > -1) {
-        		String requestPath = url.substring(0, index);
-            	String params = url.substring(index+1);
-            	
-            	if("/user/create".equals(requestPath)) {
-            		User user = null;
-            		if(requestBody != null) {
-            			Map<String, String> paramMaps = HttpRequestUtils.parseQueryString(requestBody);
-            			user = new User(paramMaps.get("userId"), paramMaps.get("password"), paramMaps.get("name"), paramMaps.get("email"));
-            		} else {
-            			Map<String, String> paramMaps = HttpRequestUtils.parseQueryString(params);
-            			user = new User(paramMaps.get("userId"), paramMaps.get("password"), paramMaps.get("name"), paramMaps.get("email"));
-            		}
-            		DataBase.addUser(user);
-            	}
+        	if("/user/login".equals(url)) {
+        		if(requestBody != null) {
+        			Map<String, String> paramMaps = HttpRequestUtils.parseQueryString(requestBody);
+        			User user = DataBase.findUserById(paramMaps.get("userId"));
+        			
+        			if(user!=null && user.getPassword().equals(paramMaps.get("password"))) {
+        				//login success
+        				cookie = "logined=true";
+        				url = "/index.html";
+        			} else {
+        				//login fail
+        				cookie = "logined=false";
+        				url = "/user/login_failed.html";
+        			}
+        		}
         	}
         	
         	byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
         	
             DataOutputStream dos = new DataOutputStream(out);
-            response200Header(dos, body.length);
+            if(responseCode == 302) {
+            	response302Header(dos);
+            } else {
+            	response200Header(dos, body.length, cookie);
+            }
             responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, String cookie) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+    
+    private void response302Header(DataOutputStream dos) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: /index.html\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

@@ -51,12 +51,12 @@ public class RequestHandler extends Thread {
         			
         			url = tokens[1];
         			
-        			log.debug("url:"+url);
         			String[] paths = url.split("/");
         			String path = paths[paths.length-1];
-        			log.debug("path:"+path);
-        			isCss = "css".equals(path.substring(path.indexOf(".")+1));
-        			log.debug("ext:"+path.substring(path.indexOf(".")+1));
+        			while (path.indexOf(".") > -1) {
+        				path = path.substring(path.indexOf(".")+1);
+        			}
+        			isCss = "css".equals(path);
         		} 
         		
         		if(line.startsWith("Content-Length")) {

@@ -101,6 +101,8 @@ public class RequestHandler extends Thread {
         				cookie = "logined=false";
         				url = "/user/login_failed.html";
         			}
+        			
+        			responseCode = 302;
         		}
         	}
         	
@@ -116,7 +118,7 @@ public class RequestHandler extends Thread {
         	
             DataOutputStream dos = new DataOutputStream(out);
             if(responseCode == 302) {
-            	response302Header(dos);
+            	response302Header(dos, cookie);
             } else {
             	response200Header(dos, body.length, cookie, isCss);
             }
@@ -134,7 +136,9 @@ public class RequestHandler extends Thread {
             } else {
             	dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             }
-            dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
+            if(!"".equals(cookie)) {
+            	dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
+            }
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -142,10 +146,13 @@ public class RequestHandler extends Thread {
         }
     }
     
-    private void response302Header(DataOutputStream dos) {
+    private void response302Header(DataOutputStream dos, String cookie) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
             dos.writeBytes("Location: /index.html\r\n");
+            if(!"".equals(cookie)) {
+            	dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
+            }
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

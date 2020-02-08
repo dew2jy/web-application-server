@@ -28,6 +28,10 @@ public class User {
     public String getEmail() {
         return email;
     }
+    
+    public static UserBuilder builder() {
+    	return new UserBuilder();
+    }
 
     @Override
     public String toString() {

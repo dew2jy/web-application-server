@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -46,17 +47,14 @@ public class RequestHandler extends Thread {
         	int lineCount = 0;
         	while((line=reader.readLine()) != null && !"".equals(line)) {
         		//header
+        		log.debug(line);
         		if(lineCount == 0) {
         			String[] tokens = line.split(" ");
         			
         			url = tokens[1];
         			
-        			String[] paths = url.split("/");
-        			String path = paths[paths.length-1];
-        			while (path.indexOf(".") > -1) {
-        				path = path.substring(path.indexOf(".")+1);
-        			}
-        			isCss = "css".equals(path);
+        			if(url.endsWith(".css"))
+        				isCss = true;
         		} 
         		
         		if(line.startsWith("Content-Length")) {
@@ -112,17 +110,34 @@ public class RequestHandler extends Thread {
         		if(!logined) {
         			url = "/user/login.html";
         		}
+        		
+        		Collection<User> users = DataBase.findAll();
+        		StringBuilder sb = new StringBuilder();
+        		sb.append("<table border='1'>");
+        		for(User user : users) {
+        			sb.append("<tr>");
+        			sb.append("<td>"+user.getUserId()+"</td>");
+        			sb.append("<td>"+user.getName()+"</td>");
+        			sb.append("<td>"+user.getEmail()+"</td>");
+        			sb.append("</tr>");
+        		}
+        		sb.append("</table>");
+        		byte[] body = sb.toString().getBytes();
+        		DataOutputStream dos = new DataOutputStream(out);
+        		response200Header(dos, body.length, cookie, isCss);
+        		responseBody(dos, body);
+        	} else {
+        		byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+            	
+                DataOutputStream dos = new DataOutputStream(out);
+                if(responseCode == 302) {
+                	response302Header(dos, cookie);
+                } else {
+                	response200Header(dos, body.length, cookie, isCss);
+                }
+                responseBody(dos, body);
         	}
         	
-        	byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-        	
-            DataOutputStream dos = new DataOutputStream(out);
-            if(responseCode == 302) {
-            	response302Header(dos, cookie);
-            } else {
-            	response200Header(dos, body.length, cookie, isCss);
-            }
-            responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }

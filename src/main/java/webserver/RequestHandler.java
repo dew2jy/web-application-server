@@ -3,7 +3,6 @@ package webserver;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +14,6 @@ import controller.Controller;
 import controller.CreateUserController;
 import controller.ListUserController;
 import controller.LoginController;
-import db.DataBase;
-import model.User;
-import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);

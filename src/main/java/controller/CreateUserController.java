@@ -8,7 +8,7 @@ import webserver.HttpResponse;
 public class CreateUserController extends AbstractController{
 
 	@Override
-	public void doPost(HttpRequest request, HttpResponse response) throws Exception {
+	protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
 		User user = User.builder()
 				.userId(request.getParameter("userId"))
 				.email(request.getParameter("email"))
@@ -19,11 +19,6 @@ public class CreateUserController extends AbstractController{
 		DataBase.addUser(user);
 		
 		response.sendRedirect("/index.html");
-	}
-
-	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
-		
 	}
 
 }

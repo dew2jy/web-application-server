@@ -12,7 +12,7 @@ import webserver.HttpResponse;
 public class ListUserController extends AbstractController{
 
 	@Override
-	public void service(HttpRequest request, HttpResponse response) throws IOException {
+	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
 		String url = "";
 		if(!HttpRequestUtils.isLogin(HttpRequestUtils.parseCookies(request.getHeader("Cookie")))) {
 			url = "/user/login.html";
@@ -34,16 +34,6 @@ public class ListUserController extends AbstractController{
 		
 		response.setBody(sb.toString().getBytes());
 		response.forward(url);
-	}
-
-	@Override
-	public void doPost(HttpRequest request, HttpResponse response) {
-		
-	}
-
-	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
-		
 	}
 
 }

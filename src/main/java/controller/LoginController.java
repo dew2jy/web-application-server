@@ -8,7 +8,7 @@ import webserver.HttpResponse;
 public class LoginController extends AbstractController{
 
 	@Override
-	public void doPost(HttpRequest request, HttpResponse response) throws Exception {
+	protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
 		User user = DataBase.findUserById(request.getParameter("userId"));
 		String url = "";
 		
@@ -23,11 +23,6 @@ public class LoginController extends AbstractController{
 			url = "/user/login_failed.html";
 			response.forward(url);
 		}
-	}
-
-	@Override
-	public void doGet(HttpRequest request, HttpResponse response) {
-		
 	}
 
 }

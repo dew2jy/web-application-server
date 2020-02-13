@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import common.RequestMapping;
 import controller.AbstractController;
 import controller.Controller;
 import controller.CreateUserController;
@@ -28,11 +29,6 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
         String url = null;
-        Map<String, Controller> controllers = new HashMap<>();
-
-        controllers.put("/user/create", new CreateUserController());
-        controllers.put("/user/login", new LoginController());
-        controllers.put("/user/list", new ListUserController());
         
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
@@ -41,9 +37,10 @@ public class RequestHandler extends Thread {
 
         	HttpResponse response = new HttpResponse(out);
         	
-        	if(controllers.containsKey(url)) {
-        		AbstractController acontroller = (AbstractController) controllers.get(url);
-            	acontroller.service(request, response);
+        	Controller controller = RequestMapping.getController(url);
+        	
+        	if(controller != null) {
+            	controller.service(request, response);
         	} else {
         		response.forward(url);
         	}
